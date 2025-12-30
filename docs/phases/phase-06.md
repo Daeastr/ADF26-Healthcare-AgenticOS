@@ -1,30 +1,35 @@
-# Phase 6 — Agent runtime patterns (tools, memory, safety rails)
+# Phase 6 — Governance Kernel v1 (Policy-as-Code + Explainability with PHI Controls)
 
 ## Objective
-Define and implement standard patterns for agents operating under the kernel: tool access, memory, and safety rails.
+Make governance enforceable and explainable without leaking PHI.
 
 ## Key build activities
-- Define tool invocation interface mediated by kernel.
-- Define memory stores and PHI-safe caching rules.
-- Add safety rails: refusal policies, escalation, bounded autonomy.
-- Add evaluation harness hooks for agent behaviors.
+Policy engine; explainability ledger with redaction; immutable audit chain; policy change workflow with judge gating.
 
 ## Risks
-- Agents bypass kernel controls.
-- Memory leaks PHI or causes stale actions.
-- Tool misuse leads to unsafe state changes.
+PHI leakage in rationale; policy explosion; governance bottleneck.
 
 ## Oversight checks applied
-- Security review: tool permissions and isolation.
-- Privacy review: memory retention and redaction.
-- Clinical review: escalation thresholds.
+J1 PHI minimization; J2 secure storage + key mgmt; J3 tiered governance.
 
-## Judge decisions (J1/J2/J3)
-- **J1:** Agent interface and tool mediation complete.
-- **J2:** Safety rails enforce human oversight.
-- **J3:** Actions + justifications are fully auditable.
+## Judge decisions
+
+### J1: Pass (after required design)
+Only “explainability-by-reference” allowed; no raw PHI in rationale store.
+
+**Remediation if violated:** block releases; enforce redaction tests.
+
+### J2: Conditional Pass
+Add encryption boundaries + rotation + secrets discipline.
+
+**Remediation:** envelope encryption and key rotation plan.
+
+### J3: Conditional Pass
+Must implement risk-tiered policy review lanes.
+
+**Remediation:** define low/medium/high risk policy change process.
 
 ## Exit criteria
-- Agent SDK/patterns documented.
-- Tool mediation enforced by kernel.
-- Memory policy implemented.
+Policies enforce decisions; explainability stored safely; policy change gate operational.
+
+---

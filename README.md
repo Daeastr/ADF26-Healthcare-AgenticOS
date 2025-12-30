@@ -1,74 +1,48 @@
 # ClinOps Kernel — Healthcare AgenticOS
 
-This repository scaffolds **ClinOps Kernel**, a governance-first “clinical operations kernel” for building and operating healthcare agentic systems.
+ClinOps Kernel is a governance-first “clinical operations kernel” for building and operating healthcare agentic systems.
 
-The kernel is the **minimal, auditable, policy-controlled core** that:
+It is designed to be the missing execution-control layer that makes agentic systems safe and certifiable in real clinical operations.
 
-- Defines the canonical **event model** and **contracts** between agents, SMART apps, model endpoints, and humans.
-- Applies **policy versioning** and enforcement (scope, permissions, escalation, overrides).
-- Produces **tamper-evident audit evidence** for each decision and action.
-- Implements safety-by-design controls: threat modeling, oversight checks, and “judge” decisions.
+## Components this repo will host
 
-The practical goal: make it straightforward to build clinically useful automation (e.g., bed flow, medication workflow guidance, discharge planning) while keeping **governance, auditability, and risk controls** default-on.
+- **Agents**
+  - Bed flow
+  - Medication workflow advisor
+  - Discharge planning
+- **SMART apps** (embedded clinician apps)
+- **Model-serving endpoints** (versioned, gated, monitored)
 
----
+## Exactly 10 Phases Development Plan
 
-## Exactly-10-phase development plan
-
-This repo follows an **exactly 10 phase** delivery plan. Each phase has a markdown file under `docs/phases/` with:
-
+Each phase has a dedicated file under `docs/phases/` and includes:
 - Objective
 - Key build activities
 - Risks
 - Oversight checks applied
-- Judge decisions (J1/J2/J3)
+- Judge decisions (3-layer: J1/J2/J3)
 - Exit criteria
 
-### Phases
+### Phase index
+1. Phase 1 — Kernel Contract & Clinical Action Taxonomy
+2. Phase 2 — Identity Fabric Baseline (Keycloak + OS Tokens)
+3. Phase 3 — SMART Launch Gateway (client-js mediated)
+4. Phase 4 — Interop Data Plane (FHIR Syscalls) + Conformance Gates
+5. Phase 5 — Clinical Workflow Host Adapter v1 (OpenMRS Driver)
+6. Phase 6 — Governance Kernel v1 (Policy-as-Code + Explainability with PHI Controls)
+7. Phase 7 — Clinical CI/CD Kernel (Synthea-first validation + rollout safety)
+8. Phase 8 — Production Orchestration Pilot (Bed Flow + Medication Workflow)
+9. Phase 9 — Evidence & Impact Plane (OMOP outcome loop)
+10. Phase 10 — Health-System Scale & Continuous Certification (multi-hospital)
 
-1. **Phase 1 — Kernel contract + event model + audit baseline**
-2. **Phase 2 — Policy engine + versioning + enforcement points**
-3. **Phase 3 — Identity, authZ, break-glass, and consent hooks**
-4. **Phase 4 — Observability + metrics + incident playbooks**
-5. **Phase 5 — Tamper-evident ledger + evidence packaging**
-6. **Phase 6 — Agent runtime patterns (tools, memory, safety rails)**
-7. **Phase 7 — SMART app integration patterns and UX guardrails**
-8. **Phase 8 — Model serving endpoints + evaluation harness**
-9. **Phase 9 — Clinical validation workflows + PHI handling hardening**
-10. **Phase 10 — Production readiness + governance operations**
+## What this enables (that the originals cannot do alone)
 
-See `docs/phases/phase-01.md` … `docs/phases/phase-10.md`.
+SMART client-js enables app authorization, Keycloak enables IAM, FHIR server enables data access, OpenMRS enables workflow operations, Synthea enables synthetic testing, OHDSI enables outcomes measurement—but none enforce:
 
----
+(a) non-bypassable runtime clinical policy decisions,
+(b) end-to-end provenance from authorization → action → outcome, and
+(c) harm-signal rollback tied to production orchestration, at health-system scale.
 
-## Repository layout (scaffold)
-
-- `docs/`
-  - `kernel/` — kernel contracts, taxonomies, threat model, ledger design
-  - `phases/` — the 10-phase plan specs
-  - `adr/` — architecture decision records
-- `kernel/` — governance kernel implementation (scaffold)
-- `agents/` — agent implementations (scaffold)
-- `smart-apps/` — SMART on FHIR apps (scaffold)
-- `model-serving/` — model endpoints and adapters (scaffold)
+ClinOps Kernel is explicitly designed to be that missing execution-control layer.
 
 ---
-
-## Phase 1 deliverables (initial)
-
-Phase 1 focuses on defining the **contracts and canonical shapes** needed before implementing runtime code:
-
-- Kernel contract (`docs/kernel/kernel-contract.md`)
-- Clinical action taxonomy (`docs/kernel/clinical-action-taxonomy.md`)
-- Audit taxonomy (`docs/kernel/audit-taxonomy.md`)
-- Threat model (`docs/kernel/threat-model.md`)
-- Tamper-evident ledger concept (`docs/kernel/tamper-evident-ledger.md`)
-- ADRs for canonical event model and policy versioning (`docs/adr/`)
-
----
-
-## Notes / guardrails
-
-This scaffolding is intentionally implementation-light. It is meant to be a **design and governance baseline**.
-
-Nothing in this repository constitutes medical advice. Any deployment must undergo appropriate institutional approvals, security review, and clinical validation.

@@ -1,30 +1,31 @@
-# Phase 10 — Production readiness + governance operations
+# Phase 10 — Health-System Scale & Continuous Certification (multi-hospital)
 
 ## Objective
-Finalize production readiness: operational processes, governance operations, and continuous improvement.
+Scale safely across facilities and sustain continuous compliance + recertification.
 
 ## Key build activities
-- Define on-call, maintenance windows, and incident SLAs.
-- Implement policy change management and approvals.
-- Implement continuous evaluation and periodic audits.
-- Finalize documentation and training materials.
+Multi-tenant policy domains; surge mode orchestration; tenant isolation; DR/failover drills; continuous recertification pipeline; audit package generator.
 
 ## Risks
-- Governance burden slows safe iteration.
-- Incomplete operational coverage.
-- Unclear accountability.
+Cross-tenant leakage; policy divergence; cascading failures; governance overload.
 
 ## Oversight checks applied
-- Operational readiness review.
-- Security/compliance review.
-- Clinical governance sign-off.
+J1 data residency/tenant boundaries; J2 blast radius + DR; J3 constrain scale features to kernel responsibilities.
 
-## Judge decisions (J1/J2/J3)
-- **J1:** Runbooks and operational controls complete.
-- **J2:** Governance processes enforce safety.
-- **J3:** Audit readiness demonstrable with evidence bundles.
+## Judge decisions
+
+### J1: Conditional Pass
+Must formalize tenant separation, residency, audit partitioning.
+
+**Remediation:** enforce tenant isolation controls and audit segmentation.
+
+### J2: Pass
+DR + containment aligns with production safety.
+
+### J3: Conditional Pass
+Surge response limited to priority/guard changes, not new product modules.
+
+**Remediation:** scope guardrails for surge features.
 
 ## Exit criteria
-- Production readiness checklist signed.
-- Governance ops processes running.
-- Release to controlled production environment.
+Multi-tenant isolation proven; DR test passed; recertification and audit packaging operational.

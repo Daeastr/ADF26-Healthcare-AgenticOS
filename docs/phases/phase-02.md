@@ -1,31 +1,33 @@
-# Phase 2 — Policy engine + versioning + enforcement points
+# Phase 2 — Identity Fabric Baseline (Keycloak + OS Tokens)
 
 ## Objective
-Define and implement the initial policy system: policy objects, versioning, evaluation, and enforcement points in the kernel.
+Establish enterprise IAM with step-up auth and service identities.
 
 ## Key build activities
-- Define policy schema (scope, actor, action, resource, constraints).
-- Implement policy evaluation hooks at key kernel boundaries.
-- Add policy versioning and migration strategy (per ADR).
-- Add policy references into event envelope.
+Keycloak OIDC realm; service-to-service identity; baseline RBAC; token minting for OS Gateway; emergency access concept draft.
 
 ## Risks
-- Policy complexity leading to inconsistent enforcement.
-- Version sprawl and inability to reproduce historical decisions.
-- Over-reliance on policy without usable authoring tools.
+Over-centralization; outage dependency; mis-scoped tokens.
 
 ## Oversight checks applied
-- Security review: authorization semantics and default-deny.
-- Governance review: policy lifecycle, approvals, and rollback.
-- Audit review: ensuring policy version is always recorded.
+J1 policy mapping; J2 secure token handling; J3 avoid “IAM project” detour.
 
-## Judge decisions (J1/J2/J3)
-- **J1:** Policy schema complete and testable.
-- **J2:** Safe defaults, break-glass constraints, least privilege.
-- **J3:** Reproducibility of decisions given event + policy version.
+## Judge decisions
+
+### J1: Conditional Pass
+Need break-glass + post-hoc review requirements.
+
+**Remediation:** define emergency access workflow + audit artifacts.
+
+### J2: Pass
+Identity baseline is standardizable and testable.
+
+### J3: Conditional Pass
+Keep IAM minimal; don’t rebuild authorization logic that belongs in kernel.
+
+**Remediation:** document split: Keycloak=authn, kernel=purpose-of-use ABAC.
 
 ## Exit criteria
-- Policy schema finalized.
-- Enforcement points documented and minimally implemented.
-- Versioning and rollback procedures defined.
-- Events reliably reference exact policy versions.
+Keycloak integrated; OS can authenticate users/services; break-glass draft approved (no fails).
+
+---

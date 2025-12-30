@@ -1,30 +1,33 @@
-# Phase 9 — Clinical validation workflows + PHI handling hardening
+# Phase 9 — Evidence & Impact Plane (OMOP outcome loop)
 
 ## Objective
-Run clinical validation workflows and harden PHI handling across kernel, agents, apps, and models.
+Quantify outcomes and feed back into governance (judge-gated).
 
 ## Key build activities
-- Define validation protocol and acceptance metrics.
-- Implement de-identification/redaction improvements.
-- Add access controls for evidence bundles.
-- Conduct tabletop exercises for failure modes.
+Versioned operational→OMOP mappings; CDM instantiation automation; cohort/outcome jobs; drift detection; policy tuning proposals.
 
 ## Risks
-- Validation scope mismatch (too narrow).
-- PHI exposure through logs/evidence.
-- Safety events not handled consistently.
+Causal ambiguity; mapping drift; version conflicts.
 
 ## Oversight checks applied
-- Clinical governance review of validation plan.
-- Privacy + security audits.
-- Incident response drills.
+J1 ethical measurement; J2 mapping/version regression; J3 impact tied to operational levers.
 
-## Judge decisions (J1/J2/J3)
-- **J1:** Validation methodology sound.
-- **J2:** PHI handling meets institutional requirements.
-- **J3:** Post-incident evidence and remediation auditable.
+## Judge decisions
+
+### J1: Pass
+Measurement and surveillance strengthen governance.
+
+### J2: Conditional Pass
+Need mapping versioning + migration/backfill strategy.
+
+**Remediation:** mapping artifact lifecycle + regression tests.
+
+### J3: Conditional Pass
+Every metric must map to a controllable decision boundary.
+
+**Remediation:** ban “orphan metrics” with no operational lever.
 
 ## Exit criteria
-- Validation results documented.
-- PHI hardening measures completed.
-- Approval to proceed to production readiness.
+At least two outcome measures computed with provenance to orchestration events.
+
+---

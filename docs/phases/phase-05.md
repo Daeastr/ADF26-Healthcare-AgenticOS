@@ -1,30 +1,33 @@
-# Phase 5 — Tamper-evident ledger + evidence packaging
+# Phase 5 — Clinical Workflow Host Adapter v1 (OpenMRS Driver)
 
 ## Objective
-Implement the tamper-evident ledger concept and define portable evidence bundles for audit/regulatory review.
+Connect OS orchestration to real clinical workflows/events.
 
 ## Key build activities
-- Implement hash-chained event/audit records.
-- Define signing keys, rotation, and verification.
-- Define evidence bundle packaging (export format, redaction).
-- Optional anchoring strategy (e.g., periodic anchoring to external store).
+Event ingestion; task/action proposal loop; human checkpoint enforcement; replay-safe processing; schema evolution discipline.
 
 ## Risks
-- Ledger complexity and operational burden.
-- Key management failures.
-- Evidence bundles contain unnecessary PHI.
+Clinical disruption; semantic mismatch; operational instability.
 
 ## Oversight checks applied
-- Security review: key management and tamper resistance.
-- Privacy review: redaction and minimization.
-- Governance review: retention and access.
+J1 non-bypassable human gates; J2 resiliency; J3 workflow focus.
 
-## Judge decisions (J1/J2/J3)
-- **J1:** Ledger verifiability and integrity properties.
-- **J2:** Break-glass/audit events correctly included.
-- **J3:** Evidence bundles reproducible and exportable.
+## Judge decisions
+
+### J1: Conditional Pass
+Mandatory human confirmation for high-risk actions must be enforced.
+
+**Remediation:** encode action risk classes + required confirmation.
+
+### J2: Conditional Pass
+Need idempotency keys, backpressure, and replay controls.
+
+**Remediation:** implement event idempotency + dead-letter handling.
+
+### J3: Pass
+Anchors system in clinical reality.
 
 ## Exit criteria
-- Ledger MVP implemented and verified.
-- Evidence bundle format documented and tested.
-- Key rotation plan defined.
+Safe propose/confirm/execute loop demonstrated for at least one workflow.
+
+---

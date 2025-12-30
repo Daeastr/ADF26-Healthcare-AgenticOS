@@ -1,30 +1,33 @@
-# Phase 4 — Observability + metrics + incident playbooks
+# Phase 4 — Interop Data Plane (FHIR Syscalls) + Conformance Gates
 
 ## Objective
-Add measurements and operational readiness basics: logs/metrics/traces, safety metrics, and incident response playbooks.
+Provide standardized, policy-mediated access to FHIR operations.
 
 ## Key build activities
-- Define key metrics (decision latency, override rates, escalation rates).
-- Implement structured logging aligned with audit taxonomy.
-- Add trace correlation via event IDs.
-- Draft incident runbooks: PHI leak, unsafe recommendation, outage.
+Integrate microsoft/fhir-server as reference; syscall wrapper; conformance test suite; audit linkage for all reads/writes.
 
 ## Risks
-- Over-collection of data (privacy risk).
-- Under-collection reduces incident response capability.
-- Metrics misinterpreted as clinical performance.
+FHIR profile drift; server-specific coupling.
 
 ## Oversight checks applied
-- Privacy review: telemetry minimization.
-- Security review: log integrity, access controls.
-- Governance review: incident escalation rules.
+J1 access logging; J2 reliability/idempotency; J3 avoid feature parity trap.
 
-## Judge decisions (J1/J2/J3)
-- **J1:** Observability fields aligned to event model.
-- **J2:** Safety metrics meaningful and actionable.
-- **J3:** Incidents produce auditable evidence bundles.
+## Judge decisions
+
+### J1: Conditional Pass
+Must log purpose-of-use and decision basis per call.
+
+**Remediation:** enrich audit with policy decision references.
+
+### J2: Pass
+Layering + tests reduce drift risk.
+
+### J3: Conditional Pass
+Ensure pluggable FHIR backend; focus on syscalls not features.
+
+**Remediation:** create backend abstraction contract + replacement test.
 
 ## Exit criteria
-- Metrics and logging spec finalized.
-- Correlation IDs consistently implemented.
-- Incident playbooks written and reviewed.
+FHIR syscalls operational; conformance suite passing; audits linked to policy decisions.
+
+---

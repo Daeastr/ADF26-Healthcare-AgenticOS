@@ -1,30 +1,33 @@
-# Phase 7 — SMART app integration patterns and UX guardrails
+# Phase 7 — Clinical CI/CD Kernel (Synthea-first validation + rollout safety)
 
 ## Objective
-Provide SMART on FHIR app patterns that interact safely with kernel decisions and evidence.
+Clinically validated deployment with rollback on harm signals.
 
 ## Key build activities
-- Define SMART launch context usage and redaction rules.
-- Define UX patterns for showing justifications and evidence.
-- Implement review/approval UI flows for high-risk actions.
-- Define clinician feedback capture into events.
+Artifact typing; Synthea scenario packs in CI; conformance + safety tests; canary deployments; harm rollback triggers; release attestation.
 
 ## Risks
-- UX encourages over-trust in recommendations.
-- SMART context handling exposes PHI.
-- Approval workflows become unusable.
+Synthetic-only blind spots; wrong harm thresholds; rollback instability.
 
 ## Oversight checks applied
-- Clinical usability review.
-- Privacy review for SMART scopes.
-- Governance review: approvals and accountability.
+J1 evidence retention; J2 reproducible builds + SBOM; J3 ensure CI/CD serves kernel mission.
 
-## Judge decisions (J1/J2/J3)
-- **J1:** SMART integration follows kernel contracts.
-- **J2:** UX clearly communicates uncertainty/limits.
-- **J3:** Approvals and feedback are captured as auditable events.
+## Judge decisions
+
+### J1: Conditional Pass
+Validation evidence must be auditable and retained.
+
+**Remediation:** evidence retention + access controls.
+
+### J2: Conditional Pass
+Require SBOM + provenance attestations + reproducible env.
+
+**Remediation:** supply chain controls and deterministic pipelines.
+
+### J3: Pass
+Safety CI/CD is core differentiator.
 
 ## Exit criteria
-- SMART integration guide published.
-- UX guardrails documented and prototyped.
-- Feedback loops implemented in events.
+Pipeline gates enforced; Synthea scenarios run; canary+rollback proven in staging.
+
+---
