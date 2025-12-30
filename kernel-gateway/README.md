@@ -1,32 +1,41 @@
-# kernel-gateway (minimal token mint stub)
+# kernel-gateway
 
-Minimal Node/TypeScript service providing a **Phase 3** stub token mint endpoint.
+Development gateway for kernel services.
 
-## Endpoint
+## Token mint stub (dev)
 
-- `POST /auth/mint`
+`POST /auth/mint`
 
-Accepts a JSON body compatible with the `smart-launch-gateway` token exchange and returns:
+This endpoint is a **development stub** that mints a short-lived JWT.
 
-```json
-{ "access_token": "...", "token_type": "Bearer", "expires_in": 3600 }
-```
+### Required JSON fields
 
-## Local dev
+- `sub` (string) – subject / user identifier
+- `aud` (string) – audience
+- `trace_id` (string) – required correlation identifier for the request/trace
+- `parent_event_id` (string) – required parent event identifier
+- `policy_id` (string) – policy identifier (placeholder acceptable for now)
+- `policy_version` (string) – policy version (placeholder acceptable for now)
+- `policy_decision_id` (string) – policy decision identifier (placeholder acceptable for now)
+
+### Behavior
+
+- Responds `400` with `missing_required_fields` if any required fields are absent.
+- Mints all required fields above into the JWT as claims.
+
+### Example
 
 ```bash
-cd kernel-gateway
-cp .env.example .env
-npm install
-npm run dev
+curl -sS http://localhost:3001/auth/mint \
+  -H 'content-type: application/json' \
+  -d '{
+    "sub": "user:123",
+    "aud": "smart-launch-gateway",
+    "scope": "launch",
+    "trace_id": "trace_abc",
+    "parent_event_id": "evt_root",
+    "policy_id": "policy_placeholder",
+    "policy_version": "0",
+    "policy_decision_id": "decision_placeholder"
+  }'
 ```
-
-Service listens on `http://localhost:8788` by default.
-
-## Environment variables
-
-- `PORT` (default `8788`)
-- `TOKEN_SIGNING_SECRET` (**required**) HS256 secret
-- `TOKEN_ISSUER` (default `http://localhost:<PORT>`)
-- `TOKEN_AUDIENCE_DEFAULT` (used if request omits `audience`)
-- `TOKEN_TTL_SECONDS` (default `3600`)

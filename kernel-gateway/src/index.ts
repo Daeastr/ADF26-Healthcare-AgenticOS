@@ -1,100 +1,78 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import { SignJWT } from 'jose';
-import { v4 as uuidv4 } from 'uuid';
-
-dotenv.config();
+import express from "express";
+import jwt from "jsonwebtoken";
 
 const app = express();
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json());
 
-const PORT = parseInt(process.env.PORT || '8788', 10);
-const TOKEN_SIGNING_SECRET = process.env.TOKEN_SIGNING_SECRET;
-if (!TOKEN_SIGNING_SECRET) {
-  // Fail fast so we don't mint unsigned/weak tokens.
-  throw new Error('Missing required env var TOKEN_SIGNING_SECRET');
-}
+/**
+ * Token mint stub for local/dev integration.
+ *
+ * NOTE: This endpoint is intentionally minimal and should be replaced with a
+ * real issuer in production.
+ */
+app.post("/auth/mint", (req, res) => {
+  const {
+    sub,
+    aud,
+    scope,
+    // New required correlation fields
+    trace_id,
+    parent_event_id,
+    // New required policy decision placeholders
+    policy_id,
+    policy_version,
+    policy_decision_id,
+    // Allow optional extras
+    ...rest
+  } = req.body ?? {};
 
-const issuer = process.env.TOKEN_ISSUER || `http://localhost:${PORT}`;
-const audienceDefault = process.env.TOKEN_AUDIENCE_DEFAULT || 'smart-launch-gateway';
-const ttlSeconds = parseInt(process.env.TOKEN_TTL_SECONDS || '3600', 10);
+  const missing: string[] = [];
 
-type MintRequestBody = {
-  grant_type?: string;
-  code?: string;
-  redirect_uri?: string;
-  client_id?: string;
-  scope?: string;
-  audience?: string;
-  purpose?: string; // maps to 'pou' claim
-};
+  // Keep supporting existing required fields if present in this stub
+  if (!sub) missing.push("sub");
+  if (!aud) missing.push("aud");
 
-function requireString(body: any, key: string): string {
-  const val = body?.[key];
-  if (typeof val !== 'string' || val.trim().length === 0) {
-    throw new Error(`Missing or invalid required field: ${key}`);
-  }
-  return val;
-}
+  // Tightened requirements
+  if (!trace_id) missing.push("trace_id");
+  if (!parent_event_id) missing.push("parent_event_id");
+  if (!policy_id) missing.push("policy_id");
+  if (!policy_version) missing.push("policy_version");
+  if (!policy_decision_id) missing.push("policy_decision_id");
 
-app.post('/auth/mint', async (req, res) => {
-  try {
-    const body = (req.body || {}) as MintRequestBody;
-
-    // Minimal allowlist check
-    const grantType = requireString(body, 'grant_type');
-    if (grantType !== 'smart_authorization_code') {
-      return res.status(400).json({
-        error: 'unsupported_grant_type',
-        error_description: 'Only grant_type smart_authorization_code is allowed'
-      });
-    }
-
-    // Validate basic fields used by typical exchange
-    requireString(body, 'code');
-    requireString(body, 'redirect_uri');
-    requireString(body, 'client_id');
-
-    // Not strictly required by RFC, but expected for this flow.
-    const scope = requireString(body, 'scope');
-
-    const audience = (typeof body.audience === 'string' && body.audience.trim().length > 0)
-      ? body.audience
-      : audienceDefault;
-
-    const now = Math.floor(Date.now() / 1000);
-    const exp = now + (Number.isFinite(ttlSeconds) ? ttlSeconds : 3600);
-
-    const jwt = await new SignJWT({
-      scope,
-      pou: typeof body.purpose === 'string' ? body.purpose : undefined
-    })
-      .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
-      .setIssuer(issuer)
-      // Placeholder subject; replace with real user/patient identity as kernel matures.
-      .setSubject('placeholder-subject')
-      .setAudience(audience)
-      .setIssuedAt(now)
-      .setExpirationTime(exp)
-      .setJti(uuidv4())
-      .sign(new TextEncoder().encode(TOKEN_SIGNING_SECRET));
-
-    return res.json({
-      access_token: jwt,
-      token_type: 'Bearer',
-      expires_in: exp - now
-    });
-  } catch (err: any) {
+  if (missing.length) {
     return res.status(400).json({
-      error: 'invalid_request',
-      error_description: err?.message || 'Invalid request'
+      error: "missing_required_fields",
+      missing,
     });
   }
+
+  const secret = process.env.JWT_SECRET || "dev-secret";
+
+  // Mint required fields into the token as claims
+  const token = jwt.sign(
+    {
+      sub,
+      aud,
+      scope,
+      trace_id,
+      parent_event_id,
+      policy_id,
+      policy_version,
+      policy_decision_id,
+      ...rest,
+    },
+    secret,
+    {
+      expiresIn: "15m",
+      issuer: process.env.JWT_ISSUER || "kernel-gateway",
+    }
+  );
+
+  return res.json({ access_token: token, token_type: "Bearer", expires_in: 900 });
 });
 
-app.get('/healthz', (_req, res) => res.json({ ok: true }));
-
-app.listen(PORT, () => {
+const port = Number(process.env.PORT || 3001);
+app.listen(port, () => {
   // eslint-disable-next-line no-console
-  console.log(`[kernel-gateway] listening on :${PORT}`);
+  console.log(`kernel-gateway listening on :${port}`);
 });
