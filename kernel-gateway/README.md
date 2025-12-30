@@ -1,41 +1,50 @@
 # kernel-gateway
 
-Development gateway for kernel services.
+Minimal gateway that mints an **OS token** (JWT) for the smart-launch-gateway.
 
-## Token mint stub (dev)
-
-`POST /auth/mint`
-
-This endpoint is a **development stub** that mints a short-lived JWT.
-
-### Required JSON fields
-
-- `sub` (string) – subject / user identifier
-- `aud` (string) – audience
-- `trace_id` (string) – required correlation identifier for the request/trace
-- `parent_event_id` (string) – required parent event identifier
-- `policy_id` (string) – policy identifier (placeholder acceptable for now)
-- `policy_version` (string) – policy version (placeholder acceptable for now)
-- `policy_decision_id` (string) – policy decision identifier (placeholder acceptable for now)
-
-### Behavior
-
-- Responds `400` with `missing_required_fields` if any required fields are absent.
-- Mints all required fields above into the JWT as claims.
-
-### Example
+## Running
 
 ```bash
-curl -sS http://localhost:3001/auth/mint \
-  -H 'content-type: application/json' \
-  -d '{
-    "sub": "user:123",
-    "aud": "smart-launch-gateway",
-    "scope": "launch",
-    "trace_id": "trace_abc",
-    "parent_event_id": "evt_root",
-    "policy_id": "policy_placeholder",
-    "policy_version": "0",
-    "policy_decision_id": "decision_placeholder"
-  }'
+npm install
+npm run dev
+```
+
+By default the server listens on **port 8788**.
+
+## Configuration
+
+- `PORT` (optional): listening port. Defaults to `8788`.
+- `JWT_SECRET` (optional): HS256 signing secret used to mint JWTs.
+
+## POST `/auth/mint`
+
+Mints an `os_token` using **HS256** (jose `SignJWT`).
+
+### Request body (JSON)
+
+Required fields (aligned with `smart-launch-gateway` legacy schema):
+
+- `grant_type` (string)
+- `code` (string)
+- `redirect_uri` (string)
+- `client_id` (string)
+- `scope` (string)
+- `pou` (string)
+
+Additional required tracing/policy fields:
+
+- `trace_id` (string)
+- `parent_event_id` (string)
+- `policy_id` (string)
+- `policy_version` (string)
+- `policy_decision_id` (string)
+
+### Response
+
+```json
+{
+  "os_token": "<jwt>",
+  "token_type": "bearer",
+  "expires_in": 600
+}
 ```

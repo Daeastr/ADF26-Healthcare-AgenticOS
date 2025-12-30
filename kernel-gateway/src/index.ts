@@ -1,78 +1,112 @@
-import express from "express";
-import jwt from "jsonwebtoken";
+import express, { Request, Response } from "express";
+import bodyParser from "body-parser";
+import { SignJWT } from "jose";
 
 const app = express();
-app.use(express.json());
+app.use(bodyParser.json());
+
+// Keep legacy default port (regression fix)
+const PORT = process.env.PORT ? Number(process.env.PORT) : 8788;
+
+// HS256 signing secret (shared between gateways)
+const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
 
 /**
- * Token mint stub for local/dev integration.
+ * /auth/mint
  *
- * NOTE: This endpoint is intentionally minimal and should be replaced with a
- * real issuer in production.
+ * This endpoint mints an OS token (JWT) for the smart-launch-gateway.
+ *
+ * Required fields (aligned with smart-launch-gateway legacy schema):
+ *  - grant_type
+ *  - code
+ *  - redirect_uri
+ *  - client_id
+ *  - scope
+ *  - pou
+ *
+ * Additional required tracing/policy fields:
+ *  - trace_id
+ *  - parent_event_id
+ *  - policy_id
+ *  - policy_version
+ *  - policy_decision_id
  */
-app.post("/auth/mint", (req, res) => {
-  const {
-    sub,
-    aud,
-    scope,
-    // New required correlation fields
-    trace_id,
-    parent_event_id,
-    // New required policy decision placeholders
-    policy_id,
-    policy_version,
-    policy_decision_id,
-    // Allow optional extras
-    ...rest
-  } = req.body ?? {};
-
-  const missing: string[] = [];
-
-  // Keep supporting existing required fields if present in this stub
-  if (!sub) missing.push("sub");
-  if (!aud) missing.push("aud");
-
-  // Tightened requirements
-  if (!trace_id) missing.push("trace_id");
-  if (!parent_event_id) missing.push("parent_event_id");
-  if (!policy_id) missing.push("policy_id");
-  if (!policy_version) missing.push("policy_version");
-  if (!policy_decision_id) missing.push("policy_decision_id");
-
-  if (missing.length) {
-    return res.status(400).json({
-      error: "missing_required_fields",
-      missing,
-    });
-  }
-
-  const secret = process.env.JWT_SECRET || "dev-secret";
-
-  // Mint required fields into the token as claims
-  const token = jwt.sign(
-    {
-      sub,
-      aud,
+app.post("/auth/mint", async (req: Request, res: Response) => {
+  try {
+    const {
+      grant_type,
+      code,
+      redirect_uri,
+      client_id,
       scope,
+      pou,
       trace_id,
       parent_event_id,
       policy_id,
       policy_version,
       policy_decision_id,
-      ...rest,
-    },
-    secret,
-    {
-      expiresIn: "15m",
-      issuer: process.env.JWT_ISSUER || "kernel-gateway",
-    }
-  );
+    } = req.body || {};
 
-  return res.json({ access_token: token, token_type: "Bearer", expires_in: 900 });
+    const missing: string[] = [];
+    for (const [k, v] of Object.entries({
+      grant_type,
+      code,
+      redirect_uri,
+      client_id,
+      scope,
+      pou,
+      trace_id,
+      parent_event_id,
+      policy_id,
+      policy_version,
+      policy_decision_id,
+    })) {
+      if (v === undefined || v === null || v === "") missing.push(k);
+    }
+
+    if (missing.length) {
+      return res.status(400).json({
+        error: "invalid_request",
+        error_description: `Missing required field(s): ${missing.join(", ")}`,
+      });
+    }
+
+    // Mint JWT claims, keeping legacy behavior (no jsonwebtoken; use jose)
+    // Include tracing/policy fields as claims
+    const now = Math.floor(Date.now() / 1000);
+    const jwt = await new SignJWT({
+      scope,
+      pou,
+      trace_id,
+      parent_event_id,
+      policy_id,
+      policy_version,
+      policy_decision_id,
+      // Keep legacy request context as non-standard claims for debugging/auditing
+      grant_type,
+      code,
+      redirect_uri,
+      client_id,
+    })
+      .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+      .setIssuedAt(now)
+      .setExpirationTime(now + 60 * 10) // 10 minutes
+      .sign(new TextEncoder().encode(JWT_SECRET));
+
+    res.json({ os_token: jwt, token_type: "bearer", expires_in: 600 });
+  } catch (e: any) {
+    res.status(500).json({
+      error: "server_error",
+      error_description: e?.message || "Unknown error",
+    });
+  }
 });
 
-const port = Number(process.env.PORT || 3001);
-app.listen(port, () => {
+app.get("/health", (_req: Request, res: Response) => {
+  res.json({ ok: true });
+});
+
+app.listen(PORT, () => {
   // eslint-disable-next-line no-console
-  console.log(`kernel-gateway listening on :${port}`);
+  console.log(`kernel-gateway listening on port ${PORT}`);
 });
